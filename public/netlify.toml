@@ -1,0 +1,4 @@
+[[redirects]]
+    from = "/*"
+    to = "https://fb-realtime-a6538.firebaseapp.com/__/auth/handler"
+    status = 200
