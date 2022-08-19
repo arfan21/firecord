@@ -1,4 +1,4 @@
 [[redirects]]
     from = "/*"
-    to = "https://fb-realtime-a6538.firebaseapp.com/__/auth/handler"
+    to = "/index.html"
     status = 200
