@@ -10,9 +10,9 @@ export const AuthContext = createContext<ContextState>({ user: null });
 const AuthProvider: React.FC<Props> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    return onAuthStateChanged(auth, setUser);
-  }, []);
+  // useEffect(() => {
+  //   return onAuthStateChanged(auth, setUser);
+  // }, []);
 
   return (
     <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>
