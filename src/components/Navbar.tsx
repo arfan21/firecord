@@ -2,7 +2,7 @@ import { Icon } from "@iconify/react";
 import { Button, Modal, PasswordInput, TextInput } from "@mantine/core";
 import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { useIsLoggedIn } from "../hooks/useIsLoggedIn";
+import { useSession } from "../hooks/useSession";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import ory from "../configs/ory";
@@ -12,12 +12,13 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
+import { useLogoutUrl } from "../hooks/useLogoutUrl";
 // import { fbLogin, fbLogout } from "../network/firebase";
 
 const Navbar = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { user } = useContext(AuthContext);
-  const isLoggedIn = useIsLoggedIn();
+  const [isLoggedIn, session] = useSession();
+  const [logoutUrl] = useLogoutUrl();
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -52,21 +53,22 @@ const Navbar = () => {
         <div className="flex items-center gap-3">
           <div className="flex flex-col items-end">
             <p className="font-semibold text-sm w-[120px] sm:w-full truncate">
-              {user?.displayName}
+              {session?.identity?.traits?.name?.full || ""}
             </p>
-            <Button
-              variant="subtle"
-              compact
-              size="xs"
-              className="p-0"
-              // onClick={() => fbLogout(setIsLoading)}
-              loading={isLoading}
-            >
-              LOGOUT
-            </Button>
+            <a href={logoutUrl}>
+              <Button
+                variant="subtle"
+                compact
+                size="xs"
+                className="p-0"
+                loading={isLoading}
+              >
+                LOGOUT
+              </Button>
+            </a>
           </div>
           <img
-            src={user?.photoURL as string}
+            src={session?.identity?.traits?.picture as string}
             alt="photoURL"
             referrerPolicy="no-referrer"
             className="w-[40px] h-[40px] rounded-full"

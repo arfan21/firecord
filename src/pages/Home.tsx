@@ -1,13 +1,63 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import MessageList from "../components/MessagesList";
 import Navbar from "../components/Navbar";
-import { useIsLoggedIn } from "../hooks/useIsLoggedIn";
 import { AuthContext } from "../context/AuthContext";
 import { ActionIcon, Popover, TextInput } from "@mantine/core";
 import { Icon } from "@iconify/react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import { Session } from "@ory/client";
+import ory from "../configs/ory";
+import { useSession } from "../hooks/useSession";
+import { useLogoutUrl } from "../hooks/useLogoutUrl";
 
 export const Home = () => {
+  const [isLoggedIn, session, setSession] = useSession();
+  const [, setLogoutUrl] = useLogoutUrl();
+
+  const navigate = useNavigate();
+  const sdkErrorHandler = ory.sdkError(undefined, undefined, "/login");
+
+  const createLogoutFlow = () => {
+    // here we create a new logout URL which we can use to log the user out
+    ory.frontend
+      .createBrowserLogoutFlow(undefined, {
+        params: {
+          return_url: "/",
+        },
+        withCredentials: true,
+      })
+      .then(({ data }) => setLogoutUrl(data.logout_url))
+      .catch(sdkErrorHandler);
+  };
+
+  useEffect(() => {
+    // we check if the user is logged in by checking if there is a session
+    // if no session is found, we redirect to the login page
+    ory.frontend
+      .toSession(undefined, { withCredentials: true })
+      .then(({ data: session }) => {
+        // we set the session data which contains the user Identifier and other traits.
+        console.log(session);
+        setSession(session);
+        // Set logout flow
+        createLogoutFlow();
+      })
+      .catch(sdkErrorHandler)
+      .catch((error) => {
+        // Handle all other errors like error.message "network error" if Kratos can not be connected etc.
+        if (error.message) {
+          return navigate(`/error?error=${encodeURIComponent(error.message)}`, {
+            replace: true,
+          });
+        }
+
+        // Just stringify error and print all data
+        navigate(`/error?error=${encodeURIComponent(JSON.stringify(error))}`, {
+          replace: true,
+        });
+      });
+  }, []);
+
   const listRef = useRef<HTMLDivElement>(null);
   const [isOpenPopover, setIsOpenPopover] = useState<boolean>(false);
   const [messages, setMessages] = useState<any>([]);
@@ -15,17 +65,15 @@ export const Home = () => {
   const [isLoadingFetch, setIsLoadingFetch] = useState<boolean>(false);
   const [isLoadingSend, setIsLoadingSend] = useState<boolean>(false);
   const [inputValue, setInputValue] = useState<string>("");
-  const { user } = useContext(AuthContext);
-  const isLoggedIn = useIsLoggedIn();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoggedIn) {
       if (inputValue.length > 0) {
         const data = {
-          uid: user?.uid,
-          photoURL: user?.photoURL,
-          displayName: user?.displayName,
+          uid: session?.identity?.id || "",
+          photoURL: session?.identity?.traits?.picture || "",
+          displayName: session?.identity?.traits?.name?.full || "",
           message: inputValue,
           created_at: new Date().toISOString(),
           replying_to: replyingTo,

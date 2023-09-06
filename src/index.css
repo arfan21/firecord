@@ -26,7 +26,8 @@
   --ory-theme-input-text: #f3f4f6;
   --ory-theme-input-background: #25262b;
   --ory-theme-accent-def: #5667ec;
-
+  --ory-theme-foreground-muted: #f3f4f6; 
+  --ory-theme-foreground-subtle:  #5667ec;
 }
 
 input:-webkit-autofill,
@@ -72,5 +73,5 @@ body {
 }
 
 .text-white-override-child > * {
-  color: #f3f4f6;
+  @apply text-white;
 }

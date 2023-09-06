@@ -47,7 +47,7 @@ const sdkError = (
   const navigate = useNavigate();
 
   return useCallback(
-    (error: AxiosError): Promise<AxiosError | void> => {
+    (error: AxiosError<any, any>): Promise<AxiosError<any, any> | void> => {
       const responseData = error.response?.data || {};
 
       switch (error.response?.status) {
