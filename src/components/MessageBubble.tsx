@@ -70,6 +70,7 @@ const MessageBubble: React.FC<Props> = ({
                 src={data?.photoURL}
                 alt={data?.displayName}
                 className="w-[45px] h-[45px] mr-[10px] rounded-full object-cover"
+                referrerPolicy="no-referrer"
               />
               <div className="flex flex-col">
                 <p className="font-semibold ">

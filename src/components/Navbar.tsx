@@ -13,9 +13,14 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { useLogoutUrl } from "../hooks/useLogoutUrl";
+import { ReadyState } from "react-use-websocket";
 // import { fbLogin, fbLogout } from "../network/firebase";
 
-const Navbar = () => {
+type Props = {
+  readyState: ReadyState;
+};
+
+const Navbar = ({ readyState }: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoggedIn, session] = useSession();
   const [logoutUrl] = useLogoutUrl();
@@ -67,12 +72,27 @@ const Navbar = () => {
               </Button>
             </a>
           </div>
-          <img
-            src={session?.identity?.traits?.picture as string}
-            alt="photoURL"
-            referrerPolicy="no-referrer"
-            className="w-[40px] h-[40px] rounded-full"
-          />
+          <div className="relative">
+            <img
+              src={session?.identity?.traits?.picture as string}
+              alt="photoURL"
+              referrerPolicy="no-referrer"
+              className="w-[40px] h-[40px] rounded-full"
+            />
+            <Icon
+              icon="mdi:dot"
+              width={65}
+              height={65}
+              style={{
+                margin: 0,
+                padding: 0,
+                position: "absolute",
+                bottom: -25,
+                left: 0,
+                color: readyState === ReadyState.OPEN ? "lime" : "gray",
+              }}
+            />
+          </div>
         </div>
       ) : (
         <>

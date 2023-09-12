@@ -9,6 +9,38 @@ import { Session } from "@ory/client";
 import ory from "../configs/ory";
 import { useSession } from "../hooks/useSession";
 import { useLogoutUrl } from "../hooks/useLogoutUrl";
+import useWebSocket, { ReadyState } from "react-use-websocket";
+import { apiConfig } from "../configs/api";
+import { set } from "firebase/database";
+
+type WSRequest = {
+  status: number;
+  action: WSAction;
+  data: any;
+};
+
+type IdentityData = {
+  id: string;
+  picture: string;
+  fullname: string;
+};
+
+enum WSAction {
+  Message = "message",
+  Typing = "typing",
+  Connected = "connected",
+  Disconnected = "disconnected",
+}
+
+type Message = {
+  id: string | null;
+  uid: string;
+  photoURL: string;
+  displayName: string;
+  message: string;
+  created_at: string;
+  replying_to: any | null;
+};
 
 export const Home = () => {
   const [isLoggedIn, session, setSession] = useSession();
@@ -37,7 +69,6 @@ export const Home = () => {
       .toSession(undefined, { withCredentials: true })
       .then(({ data: session }) => {
         // we set the session data which contains the user Identifier and other traits.
-        console.log(session);
         setSession(session);
         // Set logout flow
         createLogoutFlow();
@@ -58,13 +89,64 @@ export const Home = () => {
       });
   }, []);
 
+  const { sendMessage, lastMessage, readyState } = useWebSocket(
+    apiConfig.wsURL
+  );
+
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: "Connecting",
+    [ReadyState.OPEN]: "Open",
+    [ReadyState.CLOSING]: "Closing",
+    [ReadyState.CLOSED]: "Closed",
+    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
+  }[readyState];
+
   const listRef = useRef<HTMLDivElement>(null);
   const [isOpenPopover, setIsOpenPopover] = useState<boolean>(false);
-  const [messages, setMessages] = useState<any>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [replyingTo, setReplyingTo] = useState<any>(null);
   const [isLoadingFetch, setIsLoadingFetch] = useState<boolean>(false);
   const [isLoadingSend, setIsLoadingSend] = useState<boolean>(false);
   const [inputValue, setInputValue] = useState<string>("");
+
+  useEffect(() => {
+    if (lastMessage) {
+      const data = JSON.parse(lastMessage.data) as WSRequest;
+
+      switch (data.action) {
+        case WSAction.Message:
+        case WSAction.Connected:
+          let identity = data.data as IdentityData;
+          // filter message first if same user connected under 1 minute don't show
+          let exist = messages.find((item) => {
+            if (item.uid === identity.id) {
+              if (
+                new Date().getTime() - new Date(item.created_at).getTime() <
+                60000
+              ) {
+                return true;
+              }
+            }
+            return false;
+          });
+
+          if (exist) return;
+
+          setMessages([
+            ...messages,
+            {
+              id: null,
+              uid: identity?.id || "",
+              photoURL: identity?.picture || "",
+              displayName: identity?.fullname || "",
+              message: `${identity?.fullname} has joined the chat`,
+              created_at: new Date().toISOString(),
+              replying_to: null,
+            },
+          ]);
+      }
+    }
+  }, [lastMessage]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +177,10 @@ export const Home = () => {
 
   return (
     <>
-      <Navbar />
+      <div>
+        <p>Connection Status: {connectionStatus}</p>
+      </div>
+      <Navbar readyState={readyState} />
       <Outlet />
       <MessageList
         data={messages}
