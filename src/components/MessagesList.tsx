@@ -9,11 +9,12 @@ import styles from "./MessageList.module.css";
 type Props = {
   data: any;
   isLoading: boolean;
+  replyingTo: any;
   setReplyingTo: (data: any) => void;
 };
 
 const MessageList = forwardRef<HTMLDivElement, Props>(
-  ({ data, isLoading, setReplyingTo }: Props, ref) => {
+  ({ data, isLoading, replyingTo, setReplyingTo }: Props, ref) => {
     const handleClickRepliedText = (id: string) => {
       const element = document.getElementById(id);
       element?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -24,7 +25,10 @@ const MessageList = forwardRef<HTMLDivElement, Props>(
     };
     return (
       <div
-        className="flex flex-col py-4 overflow-y-scroll scroll-smooth max-h-[calc(100vh-161px)]"
+        // max-h-[calc(100vh-160px)]
+        className={`flex flex-col  overflow-y-auto scroll-smooth w-full absolute bottom-16 ${
+          replyingTo ? "max-h-[80%]" : "max-h-[83%]"
+        }`}
         ref={ref}
       >
         {(() => {
@@ -49,7 +53,7 @@ const MessageList = forwardRef<HTMLDivElement, Props>(
                 hasLess20MinDiff(item?.created_at, data[i - 1]?.created_at);
 
               return (
-                <Fragment key={item.key}>
+                <Fragment key={item.id}>
                   {(i === 0 || hasOneDayDiff) && (
                     <Divider
                       my="xs"
@@ -74,6 +78,7 @@ const MessageList = forwardRef<HTMLDivElement, Props>(
             <p className="text-center text-zinc-500">Nothing to see here</p>
           );
         })()}
+        <div className="w-full py-2.5 "></div>
       </div>
     );
   }

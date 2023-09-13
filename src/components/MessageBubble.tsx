@@ -21,7 +21,7 @@ const MessageBubble: React.FC<Props> = ({
   return (
     <>
       <div
-        id={data.key}
+        id={data.id}
         className="relative px-4 hover:bg-zinc-800"
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
@@ -37,7 +37,7 @@ const MessageBubble: React.FC<Props> = ({
               size="sm"
               lineClamp={1}
               className="cursor-pointer hover:text-white"
-              onClick={() => onClickRepliedText(data?.replying_to?.key)}
+              onClick={() => onClickRepliedText(data?.replying_to?.id)}
             >
               {data?.replying_to?.message}
             </Text>
