@@ -13,6 +13,7 @@ import useWebSocket, { ReadyState } from "react-use-websocket";
 import { apiConfig } from "../configs/api";
 import { set } from "firebase/database";
 import { useDebounce, useDebouncedCallback } from "use-debounce";
+import { getMessages } from "../network/api";
 
 type WSRequest = {
   status: number;
@@ -36,11 +37,14 @@ enum WSAction {
 type Message = {
   id: string | null;
   uid: string;
-  photoURL: string;
-  displayName: string;
+  identity: {
+    picture: string;
+    fullname: string;
+  };
   message: string;
   created_at: string;
   replying_to: any | null;
+  replied: Message | null;
 };
 
 const ERROR_AUTH_MESSAGE = "You must be signed in to send message";
@@ -130,6 +134,15 @@ export const Home = () => {
   const [errorMessage, setErrorMessage] = useState(ERROR_AUTH_MESSAGE);
 
   useEffect(() => {
+    getMessages(setIsLoadingFetch, (data: any) => {
+      console.log(data);
+      setMessages(data?.data || []);
+      setIsLoadingFetch(false);
+      refIsScrolledBottom.current = true;
+    });
+  }, []);
+
+  useEffect(() => {
     if (listRef.current && refIsScrolledBottom.current) {
       let bottom =
         listRef.current?.scrollHeight - listRef.current?.clientHeight;
@@ -191,7 +204,6 @@ export const Home = () => {
         let position = listRef.current?.scrollTop;
 
         let isBottom = bottom <= position + 16;
-        console.log("isBottom", isBottom);
         refIsScrolledBottom.current = isBottom;
       }
       return [
@@ -199,11 +211,14 @@ export const Home = () => {
         {
           id: data?.id || null,
           uid: identity?.id || "",
-          photoURL: identity?.picture || "",
-          displayName: identity?.fullname || "",
+          identity: {
+            fullname: identity?.fullname || "",
+            picture: identity?.picture || "",
+          },
           message: message,
           created_at: new Date().toISOString(),
-          replying_to: null,
+          replying_to: data?.replying_to || null,
+          replied: data?.replied || null,
         },
       ];
     });
@@ -227,7 +242,6 @@ export const Home = () => {
     let timeoutId: any = null;
     if (lastMessage) {
       const data = JSON.parse(lastMessage.data) as WSRequest;
-      console.log("error", data);
       if (data.status !== 200) {
         if (data.status >= 400 && data.status < 500) {
           setErrorMessage(ERROR_BAD_REQUEST_MESSAGE);
@@ -313,10 +327,6 @@ export const Home = () => {
     setInputValue(e.target.value);
     debouncedTyping();
   };
-
-  useEffect(() => {
-    console.log("identitiesTyping", identitiesTyping);
-  }, [identitiesTyping]);
 
   const [labelTyping, setLabelTyping] = useState<string>("");
 

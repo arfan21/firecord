@@ -29,17 +29,18 @@ const MessageBubble: React.FC<Props> = ({
         {data?.replying_to && (
           <div className="relative flex gap-2 mb-1 ml-[18px] pl-6 items-center text-zinc-400 before:content-['┌'] before:absolute before:left-0">
             <img
-              src={data?.replying_to?.photoURL}
-              alt={data?.replying_to?.displayName}
+              src={data?.replied?.identity?.picture}
+              alt={data?.replied?.identity?.fullname}
               className="w-[20px] h-[20px] rounded-full object-cover"
+              referrerPolicy="no-referrer"
             />
             <Text
               size="sm"
               lineClamp={1}
               className="cursor-pointer hover:text-white"
-              onClick={() => onClickRepliedText(data?.replying_to?.id)}
+              onClick={() => onClickRepliedText(data?.replied?.id)}
             >
-              {data?.replying_to?.message}
+              {data?.replied?.message}
             </Text>
           </div>
         )}
@@ -67,14 +68,14 @@ const MessageBubble: React.FC<Props> = ({
           ) : (
             <>
               <img
-                src={data?.photoURL}
-                alt={data?.displayName}
+                src={data?.identity?.picture}
+                alt={data?.identity?.fullname}
                 className="w-[45px] h-[45px] mr-[10px] rounded-full object-cover"
                 referrerPolicy="no-referrer"
               />
               <div className="flex flex-col">
                 <p className="font-semibold ">
-                  {data?.displayName}
+                  {data?.identity?.fullname}
                   &nbsp;
                   <Tooltip
                     label={dayjs(data?.created_at).format(
