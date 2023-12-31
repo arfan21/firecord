@@ -29,7 +29,10 @@ const MessageBubble: React.FC<Props> = ({
         {data?.replying_to && (
           <div className="relative flex gap-2 mb-1 ml-[18px] pl-6 items-center text-zinc-400 before:content-['┌'] before:absolute before:left-0">
             <img
-              src={data?.replied?.identity?.picture}
+              src={
+                data?.replied?.identity?.picture ||
+                "https://t4.ftcdn.net/jpg/02/17/34/67/240_F_217346782_7XpCTt8bLNJqvVAaDZJwvZjm0epQmj6j.jpg"
+              }
               alt={data?.replied?.identity?.fullname}
               className="w-[20px] h-[20px] rounded-full object-cover"
               referrerPolicy="no-referrer"
@@ -68,7 +71,10 @@ const MessageBubble: React.FC<Props> = ({
           ) : (
             <>
               <img
-                src={data?.identity?.picture}
+                src={
+                  data?.identity?.picture ||
+                  "https://t4.ftcdn.net/jpg/02/17/34/67/240_F_217346782_7XpCTt8bLNJqvVAaDZJwvZjm0epQmj6j.jpg"
+                }
                 alt={data?.identity?.fullname}
                 className="w-[45px] h-[45px] mr-[10px] rounded-full object-cover"
                 referrerPolicy="no-referrer"

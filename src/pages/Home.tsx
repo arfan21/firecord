@@ -58,7 +58,7 @@ export const Home = () => {
   const [, setLogoutUrl] = useLogoutUrl();
 
   const navigate = useNavigate();
-  const sdkErrorHandler = ory.sdkError(undefined, undefined, "/login");
+  const sdkErrorHandler = ory.sdkError(undefined, undefined, "/");
 
   const createLogoutFlow = () => {
     // here we create a new logout URL which we can use to log the user out
@@ -74,6 +74,8 @@ export const Home = () => {
   };
 
   useEffect(() => {
+    if (window.location.pathname !== "/") return;
+    console.log(window.location.pathname);
     // we check if the user is logged in by checking if there is a session
     // if no session is found, we redirect to the login page
     ory.frontend

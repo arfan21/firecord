@@ -74,7 +74,10 @@ const Navbar = ({ readyState }: Props) => {
           </div>
           <div className="relative">
             <img
-              src={session?.identity?.traits?.picture as string}
+              src={
+                (session?.identity?.traits?.picture as string) ||
+                "https://t4.ftcdn.net/jpg/02/17/34/67/240_F_217346782_7XpCTt8bLNJqvVAaDZJwvZjm0epQmj6j.jpg"
+              }
               alt="photoURL"
               referrerPolicy="no-referrer"
               className="w-[40px] h-[40px] rounded-full"

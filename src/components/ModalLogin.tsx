@@ -30,12 +30,18 @@ export const ModalLogin = () => {
 
   const createFlow = () => {
     const aal2 = searchParams.get("aal2");
+    const refresh = searchParams.get("refresh");
+    const returnTo = searchParams.get("return_to");
     ory.frontend
       // aal2 is a query parameter that can be used to request Two-Factor authentication
       // aal1 is the default authentication level (Single-Factor)
       // we always pass refresh (true) on login so that the session can be refreshed when there is already an active session
       .createBrowserLoginFlow(
-        { refresh: true, aal: aal2 ? "aal2" : "aal1" },
+        {
+          refresh: Boolean(refresh),
+          aal: aal2 ? "aal2" : "aal1",
+          returnTo: returnTo ? returnTo : undefined,
+        },
         {
           withCredentials: true,
         }
@@ -43,7 +49,9 @@ export const ModalLogin = () => {
       // flow contains the form fields and csrf token
       .then(({ data: flow }) => {
         // Update URI query params to include flow id
-        setSearchParams({});
+        setSearchParams({
+          ["flow"]: flow.id,
+        });
         // Set the flow data
         setFlow(flow);
       })
@@ -75,7 +83,8 @@ export const ModalLogin = () => {
     const flowId = searchParams.get("flow");
     // the flow already exists
     if (flowId) {
-      getFlow(flowId).catch(createFlow); // if for some reason the flow has expired, we need to get a new one
+      console.log("This is the flowId: ", flowId);
+      getFlow(flowId).catch(sdkErrorHandler); // if for some reason the flow has expired, we need to get a new one
       return;
     }
 
