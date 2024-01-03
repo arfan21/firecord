@@ -13,7 +13,7 @@
     "@mantine/core": "^6.0.19",
     "@mantine/form": "^6.0.19",
     "@mantine/hooks": "^6.0.19",
-    "@ory/client": "^1.1.51",
+    "@ory/client": "^1.4.7",
     "@ory/elements": "^0.1.0-beta.2",
     "@ory/elements-test": "^0.1.0-beta.2",
     "axios": "^1.5.0",

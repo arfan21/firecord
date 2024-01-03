@@ -1,5 +1,5 @@
-import { Configuration, FrontendApi, LoginFlow } from "@ory/client";
-import axios, { Axios, AxiosError } from "axios";
+import { Configuration, FrontendApi, LoginFlow, Session } from "@ory/client";
+import axios, { Axios, AxiosError, AxiosResponse } from "axios";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -220,6 +220,9 @@ const ory = {
     }`;
   },
   sdkError,
+  toSession: () => axios.get<any, AxiosResponse<Session>>(`${apiBaseFrontendUrlInternal}/sessions/whoami?tokenize_as=jwt_template`, {
+    withCredentials: true,
+  }),
 };
 
 export default ory;

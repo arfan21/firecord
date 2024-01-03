@@ -14,6 +14,7 @@ import { apiConfig } from "../configs/api";
 import { set } from "firebase/database";
 import { useDebounce, useDebouncedCallback } from "use-debounce";
 import { getMessages } from "../network/api";
+import axios from "axios";
 
 type WSRequest = {
   status: number;
@@ -75,14 +76,13 @@ export const Home = () => {
 
   useEffect(() => {
     if (window.location.pathname !== "/") return;
-    console.log(window.location.pathname);
-    // we check if the user is logged in by checking if there is a session
-    // if no session is found, we redirect to the login page
-    ory.frontend
-      .toSession(undefined, { withCredentials: true })
-      .then(({ data: session }) => {
+
+    ory
+      .toSession()
+      .then(async ({ data: session }) => {
         // we set the session data which contains the user Identifier and other traits.
         setSession(session);
+      
         // Set logout flow
         createLogoutFlow();
       })
@@ -103,7 +103,7 @@ export const Home = () => {
   }, []);
 
   const { sendMessage, lastMessage, readyState } = useWebSocket(
-    apiConfig.wsURL
+    `${apiConfig.wsURL}?token=${session?.tokenized}`, undefined, session?.tokenized !== undefined
   );
 
   const connectionStatus = {
