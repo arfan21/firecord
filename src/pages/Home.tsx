@@ -103,7 +103,7 @@ export const Home = () => {
   }, []);
 
   const { sendMessage, lastMessage, readyState } = useWebSocket(
-    `${apiConfig.wsURL}?token=${session?.tokenized}`, undefined, session?.tokenized !== undefined
+    `${apiConfig.wsURL}?token=${session?.tokenized}`, {reconnectInterval: 5}, session?.tokenized !== undefined
   );
 
   const connectionStatus = {
